@@ -1,14 +1,3 @@
----
-output:
-  html_document:
-    highlight: kate
-    theme: cosmo
-  pdf_document: default
----
-
-```{r setup, echo=FALSE}
-
-knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 
 install.packages("primes")
 install.packages("rlist")
@@ -16,23 +5,14 @@ library(primes)
 library(MASS)
 library(rlist)
 
-```
-
-```{r initial_setup}
-
-
-```
-
-```{r functions}
-
 # Initial setup
-max_prime <- 200
-primes <- primes::generate_primes(2, max_prime)
-p_1 <- primes[1]
+max_prime <- 200 # max prime to consider
+primes <- primes::generate_primes(2, max_prime) # get the first max_prime primes
+p_1 <- primes[1] # get the first prime
 
 # First elasticities
-u_1 <- list(1)
-u_2 <- list(2)
+u_1 <- c(1)
+u_2 <- c(2)
 u_3 <- 3:4
 u_4 <- 3:5
 elasticities <- list(u_1, u_2, u_3, u_4)
@@ -145,19 +125,29 @@ find_u_k <- function(k){
   return (sort(u_k))
 }
 
+draw_plot <- function(){
+  n <- length(elasticities)
+  plot(1:n, 1:n, type = "n")  # setting up coord. system
+  for(i in 1:length(elasticities)){
+    for(j in 1:length(elasticities[i])){
+      points(i, (elasticities[i])[[j]], col = "red")
+    }
+  }
+}
 
-min_k <- 5
+min_k <- 2 # from which elasticities we will start
 max_k <- 10
 for(i in min_k:max_k){
   elasticities[[i]] <- find_u_k(i)
 }
+names(elasticities) <- 1:length(elasticities)
 
 
-```
+
+plot(4, (elasticities[4])[[1]], main="Scatterplot Example")
 
 
-``` {r crazy_testing}
-
+# Crazy testing
 z <- 1:5
 c <- c(1, 5, 10)
 setdiff(z, c)
@@ -175,4 +165,11 @@ unlist(temp)
 
 sort(c(4,3))
 
-```
+# Simple Scatterplot
+# Simple Scatterplot
+attach(mtcars)
+plot(wt, mpg, main="Scatterplot Example", 
+  	xlab="Car Weight ", ylab="Miles Per Gallon ", pch=19)
+
+names(elasticities) <- 1:length(elasticities)
+
