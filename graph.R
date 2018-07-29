@@ -64,6 +64,7 @@ max_atom_index_to_consider <- function(n){
     }
   }
   print("It didnt find the max_atom_to_consider.")
+  return(0)
 }
 
 
@@ -80,8 +81,6 @@ length_of_n_as_the_sum_of_elements_in_list_rec <- function(n, max_atom_index_to_
 }
 
 
-# atoms is a list containing only the numerators and 
-# is assumed to be a strictly increasing list of integers
 length_of_n_as_the_sum_of_elements_in_list <- function(n, max_atom_index_to_consider){
   if(max_atom_index_to_consider == 0) return (c(NA))
   if(n < (primes[1] - 1)) return (c(NA))
@@ -105,7 +104,7 @@ add_new_elasticities <- function(k){
   min_integer <- ceiling(k/2)
   # Each atom must be multiplied by their denominator (check this)
   for(n in min_integer:max_integer){
-    max_atom_index_to_consider <- max_atom_index_to_consider(k, n)
+    max_atom_index_to_consider <- max_atom_index_to_consider(n)
     u_k <- c(u_k, setdiff(length_of_n_as_the_sum_of_elements_in_list(n, max_atom_index_to_consider), u_k))
   }
   return (u_k)
