@@ -12,10 +12,7 @@ p_1 <- primes[1] # get the first prime
 
 # First elasticities
 u_1 <- c(1)
-u_2 <- c(2)
-u_3 <- 3:4
-u_4 <- 3:5
-elasticities <- list(u_1, u_2, u_3, u_4)
+elasticities <- list(u_1)
 
 # Min element in U_k
 min_elast <- function(k){
@@ -31,32 +28,23 @@ max_elast <- function(k){
 #min_elast(5)
 #max_elast(5)
 
+
+# Traverses the elements l in U_{k-1} to add l+1 to U_k, and 
+# k-1+diff to U_k, where diff=k-l
 add_known_elasticities_from_previous_sets <- function(k) {
-  #k <- 5
+  k <- 5
   u_k <- list()
-  for(i in 1:length(elasticities)){
-    #i = 3
-    diff <- k - i
-    if(diff <= 0)
-    {
-      print("The value of k must be smaller than that of i")
-      break
-    }
-    u <- unlist(elasticities[i])
-    if(length(u) != 1){
-      for(j in 1:length(u)){
-        #j <- 2
-        if(u[j] != i){
-          if(!((u[j] + diff) %in% u_k))
-            u_k[length(u_k) + 1] <- u[j] + diff
-          
-          if(u[j] <= k && !((i + diff) %in% u_k)){
-            u_k[length(u_k) + 1] <- i + diff
-          }
-        }
-      }
+  u <- unlist(elasticities[k-1])
+  
+  for(j in 1:length(u)){
+    #j <- 2
+    u_k[length(u_k) + 1] <- u[j] + 1
+    
+    if(u[j] <= k){
+      u_k[length(u_k) + 1] <- k-1 + k-u[j]
     }
   }
+
   return(unique(u_k))
 }
 
@@ -126,25 +114,44 @@ find_u_k <- function(k){
 }
 
 draw_plot <- function(){
-  n <- length(elasticities)
-  plot(1:n, 1:n, type = "n")  # setting up coord. system
-  for(i in 1:length(elasticities)){
-    for(j in 1:length(elasticities[i])){
-      points(i, (elasticities[i])[[j]], col = "red")
+  dim <- 2*length(elasticities)
+  plot(1:dim, 1:dim, type = "n")  # setting up coord. system
+  for(i in 1:length(elasticities))
+  {
+    for(j in 1:length(elasticities[[i]]))
+    {
+      points(i, (elasticities[[i]])[j], col = "red", pch=19)
     }
   }
 }
 
-min_k <- 2 # from which elasticities we will start
-max_k <- 10
+min_k <- 24 # from which elasticities we will start
+max_k <- 25
 for(i in min_k:max_k){
   elasticities[[i]] <- find_u_k(i)
 }
 names(elasticities) <- 1:length(elasticities)
+elasticities <- `20_first_elasticities`
+draw_plot()
+
+#saveRDS(elasticities, file = "20_first_elasticities.rds")
 
 
+# ------------------------------------------------------
+# ------------------------------------------------------
+# ------------------------------------------------------
+# ------------------------------------------------------
 
-plot(4, (elasticities[4])[[1]], main="Scatterplot Example")
+length(elasticities[[i]])
+
+dim <- 2*length(elasticities)
+plot(1:dim, 1:dim, type = "n")
+i <- 3
+j <- 1
+points(i, (elasticities[[i]])[j], col = "red", pch=19)
+i <- 3
+j <- 2
+points(i, (elasticities[[i]])[j], col = "red", pch=19)
 
 
 # Crazy testing
