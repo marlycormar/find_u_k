@@ -32,7 +32,7 @@ max_elast <- function(k){
 # Traverses the elements l in U_{k-1} to add l+1 to U_k, and 
 # k-1+diff to U_k, where diff=k-l
 add_known_elasticities_from_previous_sets <- function(k) {
-  k <- 5
+  #k <- 5
   u_k <- list()
   u <- unlist(elasticities[k-1])
   
@@ -51,8 +51,11 @@ add_known_elasticities_from_previous_sets <- function(k) {
 # Testing
 #u_5 <- add_known_elasticities_from_previous_sets(5)
 
-max_atom_index_to_consider <- function(k, n){
-  #k <- 5
+# Since we are only considering when n is an integer
+# we can find the max. atom that can be in a factorization 
+# of n, namely (p_i-1)/p_i where i is the smallest index 
+# such that p_i-1 >= n. 
+max_atom_index_to_consider <- function(n){
   #n <- 4
   for(i in 1:n){
     #i <- 4
