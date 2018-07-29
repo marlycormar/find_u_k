@@ -10,9 +10,6 @@ max_prime <- 200 # max prime to consider
 primes <- primes::generate_primes(2, max_prime) # get the first max_prime primes
 p_1 <- primes[1] # get the first prime
 
-# First elasticities
-u_1 <- c(1)
-elasticities <- list(u_1)
 
 # Min element in U_k
 min_elast <- function(k){
@@ -31,17 +28,15 @@ max_elast <- function(k){
 
 # Traverses the elements l in U_{k-1} to add l+1 to U_k, and 
 # k-1+diff to U_k, where diff=k-l
-add_known_lengths_from_u_k_minus_1 <- function(k) {
-  #k <- 5
+add_known_lengths_from_u_k_minus_1 <- function(k, u_k_minus_1) {
+  #k <- 2
   u_k <- list()
-  u <- unlist(elasticities[k-1])
-  
-  for(j in 1:length(u)){
-    #j <- 2
-    u_k[length(u_k) + 1] <- u[j] + 1
+  for(j in 1:length(u_k_minus_1)){
+    #j <- 1
+    u_k[length(u_k) + 1] <- u_k_minus_1[j] + 1
     
-    if(u[j] <= k){
-      u_k[length(u_k) + 1] <- k-1 + k-u[j]
+    if(u_k_minus_1[j] <= k && u_k_minus_1[j] != (k - 1)){
+      u_k[length(u_k) + 1] <- k-1 + k-u_k_minus_1[j]
     }
   }
 
@@ -49,7 +44,8 @@ add_known_lengths_from_u_k_minus_1 <- function(k) {
 }
 
 # Testing
-#u_5 <- add_known_elasticities_from_previous_sets(5)
+#u_4 <- add_known_lengths_from_u_k_minus_1(4, c(3, 4))
+#u_3 <- add_known_lengths_from_u_k_minus_1(3, c(2))
 
 # Since we are only considering when n is an integer
 # we can find the max. atom that can be in a factorization 
@@ -84,16 +80,11 @@ add_new_lengths_for_n_rec <- function(n, max_atom_index_to_consider, sum, fact_l
   return (result)
 }
 
-# Testing
-#res <- length_of_n_as_the_sum_of_elements_in_list_rec(4, c(1, 2, 4), 0, 0)
-#res <- length_of_n_as_the_sum_of_elements_in_list(4, c(1, 2, 4))
-
-
 # Adds the elasticities not found with method add_known_lengths_from_u_k_minus_1.
 # By our observations, if $x$ has a factorization of orden $k$ not obtained from $U_{k-1}$,
 # then $x$ must be an integer in certain interval. So it sufficies to iterate through such
 # interval finding all the possible elasticities of elements in that interval.
-add_new_lengths_for_n <- function(n, max_atom_index_to_consider){
+add_new_lengths_to_u_k <- function(k){
   #k <- 5
   #n <- 4
   u_k <- list()
@@ -104,7 +95,6 @@ add_new_lengths_for_n <- function(n, max_atom_index_to_consider){
   for(n in min_integer:max_integer){
     max_atom_index_to_consider <- max_atom_index_to_consider(n)
     if(max_atom_index_to_consider == 0 || (n < (primes[1] - 1))){# Do some basic checks
-      u_k <- c(u_k, NA) 
       print("Either max_atom_index_to_consider = 0 or n < (primes[1] - 1)")
     }
     else{
@@ -117,33 +107,58 @@ add_new_lengths_for_n <- function(n, max_atom_index_to_consider){
   return (u_k)
 }
 
-find_u_k <- function(k){
-  u_k <- unique(unlist(c(add_known_lengths_from_u_k_minus_1(k), add_new_elasticities(k))))
+# Finds u_k given u_{k-1}
+find_u_k <- function(k, u_k_minus_1){
+  u_k <- unique(unlist(c(add_known_lengths_from_u_k_minus_1(k, u_k_minus_1), add_new_lengths_to_u_k(k))))
   return (sort(u_k))
 }
 
-draw_plot <- function(){
-  dim <- 2*length(elasticities)
+# Testing
+# <- find_u_k(3, c(2))
+
+
+# Finds u_k for k between 1 and max_k.
+# Returns a named list containing {u_1, u_2, }
+find_set_of_union_of_sets_of_lengths <- function(max_k){
+  #max_k = 3
+  set_of_unions <- list()
+  set_of_unions[1] <- list(1)
+  for(i in 2:max_k){
+    set_of_unions[[i]] <- find_u_k(i, set_of_unions[[i-1]])
+  }
+  names(set_of_unions) <- 1:max_k
+  return(set_of_unions)
+}
+
+find_set_of_union_of_sets_of_lengths_from_min_k_to_max_k <- function(min_k, max_k, set_of_union_of_sets_of_lengths_for_k_less_than_min_k){
+  #max_k = 3
+  for(i in min_k:max_k){
+    set_of_union_of_sets_of_lengths_for_k_less_than_min_k[[i]] <- find_u_k(i, set_of_union_of_sets_of_lengths_for_k_less_than_min_k[[i-1]])
+  }
+  names(set_of_union_of_sets_of_lengths_for_k_less_than_min_k) <- 1:max_k
+  return(set_of_union_of_sets_of_lengths_for_k_less_than_min_k)
+}
+
+draw_plot <- function(set_of_union_of_sets_of_lengths){
+  dim <- 2*length(set_of_union_of_sets_of_lengths)
   plot(1:dim, 1:dim, type = "n")  # setting up coord. system
-  for(i in 1:length(elasticities))
+  for(i in 1:length(set_of_union_of_sets_of_lengths))
   {
-    for(j in 1:length(elasticities[[i]]))
+    for(j in 1:length(set_of_union_of_sets_of_lengths[[i]]))
     {
-      points(i, (elasticities[[i]])[j], col = "red", pch=19)
+      points(i, (set_of_union_of_sets_of_lengths[[i]])[j], col = "red", pch=19)
     }
   }
 }
 
-min_k <- 24 # from which elasticities we will start
-max_k <- 25
-for(i in min_k:max_k){
-  elasticities[[i]] <- find_u_k(i)
-}
-names(elasticities) <- 1:length(elasticities)
-elasticities <- `20_first_elasticities`
-draw_plot()
+max_k <- 20
+set_of_union_of_sets_of_lengths <- find_set_of_union_of_sets_of_lengths(max_k)
+draw_plot(set_of_union_of_sets_of_lengths)
+
+set_of_union_of_sets_of_lengths_2 <- find_set_of_union_of_sets_of_lengths_from_min_k_to_max_k(21, 22, set_of_union_of_sets_of_lengths)
 
 #saveRDS(elasticities, file = "20_first_elasticities.rds")
+#saveRDS(set_of_union_of_sets_of_lengths_2, file = "20_first_elasticities_july_29.rds")
 
 
 # ------------------------------------------------------
