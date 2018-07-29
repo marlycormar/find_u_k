@@ -31,7 +31,7 @@ max_elast <- function(k){
 
 # Traverses the elements l in U_{k-1} to add l+1 to U_k, and 
 # k-1+diff to U_k, where diff=k-l
-add_known_elasticities_from_previous_sets <- function(k) {
+add_known_lengths_from_u_k_minus_1 <- function(k) {
   #k <- 5
   u_k <- list()
   u <- unlist(elasticities[k-1])
@@ -55,6 +55,7 @@ add_known_elasticities_from_previous_sets <- function(k) {
 # we can find the max. atom that can be in a factorization 
 # of n, namely (p_i-1)/p_i where i is the smallest index 
 # such that p_i-1 >= n. 
+# Returns the index of such atom.
 max_atom_index_to_consider <- function(n){
   #n <- 4
   for(i in 1:n){
@@ -67,51 +68,57 @@ max_atom_index_to_consider <- function(n){
   return(0)
 }
 
-
-# The list atoms contains only the numerators of atoms
-length_of_n_as_the_sum_of_elements_in_list_rec <- function(n, max_atom_index_to_consider, sum, total_summands){
-  if(n == sum) return (c(total_summands))
+# n: an integer that is assumed to have a factorization of length k
+#    and the one we are finding all possible lengths of factorizations of.
+# max_atom_index_to_consider: the index of the max. possible atom that can be in a factorization of n.
+# sum: current factorization sum.
+# fact_length: current factorization length.
+add_new_lengths_for_n_rec <- function(n, max_atom_index_to_consider, sum, fact_length){
+  if(n == sum) return (c(fact_length))
   if(sum > n) return (c(NA))
   result <- list()
   for(i in 1:max_atom_index_to_consider){
-    temp <- length_of_n_as_the_sum_of_elements_in_list_rec(n, max_atom_index_to_consider, sum + primes[i] - 1, total_summands + primes[i])
+    temp <- add_new_lengths_for_n_rec(n, max_atom_index_to_consider, sum + primes[i] - 1, fact_length + primes[i])
     result[[length(result) + 1]] <- temp
   }
   return (result)
-}
-
-
-length_of_n_as_the_sum_of_elements_in_list <- function(n, max_atom_index_to_consider){
-  if(max_atom_index_to_consider == 0) return (c(NA))
-  if(n < (primes[1] - 1)) return (c(NA))
-  
-  res <- unlist(length_of_n_as_the_sum_of_elements_in_list_rec(n, max_atom_index_to_consider, 0, 0))
-  res <- unique(res[!is.na(res)])
-  
-  return (res)
 }
 
 # Testing
 #res <- length_of_n_as_the_sum_of_elements_in_list_rec(4, c(1, 2, 4), 0, 0)
 #res <- length_of_n_as_the_sum_of_elements_in_list(4, c(1, 2, 4))
 
-add_new_elasticities <- function(k){
+
+# Adds the elasticities not found with method add_known_lengths_from_u_k_minus_1.
+# By our observations, if $x$ has a factorization of orden $k$ not obtained from $U_{k-1}$,
+# then $x$ must be an integer in certain interval. So it sufficies to iterate through such
+# interval finding all the possible elasticities of elements in that interval.
+add_new_lengths_for_n <- function(n, max_atom_index_to_consider){
   #k <- 5
   #n <- 4
   u_k <- list()
   #possible_elast <- setdiff(min_elast(k):max_elast(k), add_known_elasticities_from_previous_sets(k))
-  max_integer <- k - 1
-  min_integer <- ceiling(k/2)
-  # Each atom must be multiplied by their denominator (check this)
+  max_integer <- k - 1 # See observations.
+  min_integer <- ceiling(k/2) # See observations.
+  # Each atom must be multiplied by a multiple of its denominator.
   for(n in min_integer:max_integer){
     max_atom_index_to_consider <- max_atom_index_to_consider(n)
-    u_k <- c(u_k, setdiff(length_of_n_as_the_sum_of_elements_in_list(n, max_atom_index_to_consider), u_k))
+    if(max_atom_index_to_consider == 0 || (n < (primes[1] - 1))){# Do some basic checks
+      u_k <- c(u_k, NA) 
+      print("Either max_atom_index_to_consider = 0 or n < (primes[1] - 1)")
+    }
+    else{
+      res <- unlist(add_new_lengths_for_n_rec(n, max_atom_index_to_consider, 0, 0))
+      res <- unique(res[!is.na(res)]) # Remove NA entries.
+      if(k %in% res)
+        u_k <- c(u_k, setdiff(res, u_k)) # Add only the new values of integers that contain a factorization of length k.
+    }
   }
   return (u_k)
 }
 
 find_u_k <- function(k){
-  u_k <- unique(unlist(c(add_known_elasticities_from_previous_sets(k), add_new_elasticities(k))))
+  u_k <- unique(unlist(c(add_known_lengths_from_u_k_minus_1(k), add_new_elasticities(k))))
   return (sort(u_k))
 }
 
