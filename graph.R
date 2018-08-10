@@ -5,26 +5,11 @@ library(primes)
 library(MASS)
 library(rlist)
 
+
 # Initial setup
 max_prime <- 200 # max prime to consider
 primes <- primes::generate_primes(2, max_prime) # get the first max_prime primes
 p_1 <- primes[1] # get the first prime
-
-
-# Min element in U_k
-min_elast <- function(k){
-  return (ceiling(k*(p_1 - 1)/p_1))
-}
-
-# Max element in U_k
-max_elast <- function(k){
-  return (floor(k*p_1/(p_1 - 1)))
-}
-
-# Testing
-#min_elast(5)
-#max_elast(5)
-
 
 # Traverses the elements l in U_{k-1} to add l+1 to U_k, and 
 # k-1+diff to U_k, where diff=k-l
@@ -80,15 +65,14 @@ add_new_lengths_for_n_rec <- function(n, max_atom_index_to_consider, sum, fact_l
   return (result)
 }
 
-# Adds the elasticities not found with method add_known_lengths_from_u_k_minus_1.
+# Adds the lengths not found with method add_known_lengths_from_u_k_minus_1.
 # By our observations, if $x$ has a factorization of orden $k$ not obtained from $U_{k-1}$,
 # then $x$ must be an integer in certain interval. So it sufficies to iterate through such
-# interval finding all the possible elasticities of elements in that interval.
+# interval finding all the possible lenghts of elements in that interval.
 add_new_lengths_to_u_k <- function(k){
   #k <- 5
   #n <- 4
   u_k <- list()
-  #possible_elast <- setdiff(min_elast(k):max_elast(k), add_known_elasticities_from_previous_sets(k))
   max_integer <- k - 1 # See observations.
   min_integer <- ceiling(k/2) # See observations.
   # Each atom must be multiplied by a multiple of its denominator.
@@ -140,15 +124,29 @@ find_set_of_union_of_sets_of_lengths_from_min_k_to_max_k <- function(min_k, max_
 }
 
 draw_plot <- function(set_of_union_of_sets_of_lengths){
-  dim <- 2*length(set_of_union_of_sets_of_lengths)
-  plot(1:dim, 1:dim, type = "n")  # setting up coord. system
+  height <- 2*length(set_of_union_of_sets_of_lengths)
+  width <- length(set_of_union_of_sets_of_lengths)
+  xValues <- c()
+  yValues <- c()
+  dotsize <- 1
+
   for(i in 1:length(set_of_union_of_sets_of_lengths))
   {
     for(j in 1:length(set_of_union_of_sets_of_lengths[[i]]))
     {
-      points(i, (set_of_union_of_sets_of_lengths[[i]])[j], col = "red", pch=19)
+      xValues <- c(xValues, i)
+      yValues <- c(yValues, (set_of_union_of_sets_of_lengths[[i]])[j])
     }
   }
+  
+  dev.new(height+10,width+20)
+  plot(xValues, yValues, cex=dotsize, xlim=c(0,width+1), ylim=c(0, height+1), bty="n", 
+       pch=18, col=2,  xlab="k", ylab="Uk", axes = FALSE)
+  #plot(xValues, yValues, cex=dotsize, xlim=c(0,width+1), ylim=c(0, height+1), 
+  #     bty="n", pch=1,  col=cm.colors(2), xlab="k", ylab="Uk", axes = FALSE)
+  axis(side = 1, at = 1:width)
+  #box()
+  axis(side = 2, at = 1:height)
 }
 
 max_k <- 20
@@ -156,51 +154,7 @@ set_of_union_of_sets_of_lengths <- find_set_of_union_of_sets_of_lengths(max_k)
 draw_plot(set_of_union_of_sets_of_lengths)
 
 set_of_union_of_sets_of_lengths_2 <- find_set_of_union_of_sets_of_lengths_from_min_k_to_max_k(21, 22, set_of_union_of_sets_of_lengths)
+draw_plot(set_of_union_of_sets_of_lengths_2)
 
-#saveRDS(elasticities, file = "20_first_elasticities.rds")
-#saveRDS(set_of_union_of_sets_of_lengths_2, file = "20_first_elasticities_july_29.rds")
-
-
-# ------------------------------------------------------
-# ------------------------------------------------------
-# ------------------------------------------------------
-# ------------------------------------------------------
-
-length(elasticities[[i]])
-
-dim <- 2*length(elasticities)
-plot(1:dim, 1:dim, type = "n")
-i <- 3
-j <- 1
-points(i, (elasticities[[i]])[j], col = "red", pch=19)
-i <- 3
-j <- 2
-points(i, (elasticities[[i]])[j], col = "red", pch=19)
-
-
-# Crazy testing
-z <- 1:5
-c <- c(1, 5, 10)
-setdiff(z, c)
-setdiff(c, z)
-str(z)
-c <- z[!(z %in% c(2, 3))]
-c
-
-temp <- list()
-other <- list(2, 3, 4)
-temp[[1]] <- other
-temp[[2]] <- c(other, 100)
-unlist(temp)
-
-
-sort(c(4,3))
-
-# Simple Scatterplot
-# Simple Scatterplot
-attach(mtcars)
-plot(wt, mpg, main="Scatterplot Example", 
-  	xlab="Car Weight ", ylab="Miles Per Gallon ", pch=19)
-
-names(elasticities) <- 1:length(elasticities)
-
+#saveRDS(set_of_union_of_sets_of_lengths, file = "from_u1_to_u20.rds")
+#saveRDS(set_of_union_of_sets_of_lengths_2, file = "from_u21_to_u22.rds")
