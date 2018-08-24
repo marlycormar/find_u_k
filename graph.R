@@ -1,4 +1,3 @@
-
 install.packages("primes")
 install.packages("rlist")
 library(primes)
@@ -6,13 +5,18 @@ library(MASS)
 library(rlist)
 
 
+# Variables to modify
+smallest_prime_to_consider <- 2
+max_k <- 20 # Max k for which to find U_k
+
 # Initial setup
 max_prime <- 200 # max prime to consider
-primes <- primes::generate_primes(2, max_prime) # get the first max_prime primes
+primes <- primes::generate_primes(smallest_prime_to_consider, max_prime) # get the first max_prime primes
 p_1 <- primes[1] # get the first prime
 
 # Traverses the elements l in U_{k-1} to add l+1 to U_k, and 
 # k-1+diff to U_k, where diff=k-l
+# u_k_minus_1 = U_{k-1}
 add_known_lengths_from_u_k_minus_1 <- function(k, u_k_minus_1) {
   #k <- 2
   u_k <- list()
@@ -74,7 +78,7 @@ add_new_lengths_to_u_k <- function(k){
   #n <- 4
   u_k <- list()
   max_integer <- k - 1 # See observations.
-  min_integer <- ceiling(k/2) # See observations.
+  min_integer <- ceiling(k*(p_1 - 1)/p_1) # See observations.
   # Each atom must be multiplied by a multiple of its denominator.
   for(n in min_integer:max_integer){
     max_atom_index_to_consider <- max_atom_index_to_consider(n)
@@ -149,7 +153,7 @@ draw_plot <- function(set_of_union_of_sets_of_lengths){
   axis(side = 2, at = 1:height)
 }
 
-max_k <- 20
+set_of_union_of_sets_of_lengths <- c()
 set_of_union_of_sets_of_lengths <- find_set_of_union_of_sets_of_lengths(max_k)
 draw_plot(set_of_union_of_sets_of_lengths)
 
