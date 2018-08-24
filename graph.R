@@ -36,7 +36,7 @@ add_known_lengths_from_u_k_minus_1 <- function(k, u_k_minus_1) {
 #u_4 <- add_known_lengths_from_u_k_minus_1(4, c(3, 4))
 #u_3 <- add_known_lengths_from_u_k_minus_1(3, c(2))
 
-# Since we are only considering when n is an integer
+# Since we are only considering the case when n is an integer
 # we can find the max. atom that can be in a factorization 
 # of n, namely (p_i-1)/p_i where i is the smallest index 
 # such that p_i-1 >= n. 
