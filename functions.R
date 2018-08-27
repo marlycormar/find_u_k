@@ -221,7 +221,7 @@ find_set_of_union_of_sets_of_lengths <- function(max_k){
   for(i in 2:max_k){
     set_of_unions[[i]] <- find_u_k(i, set_of_unions[[i-1]])
   }
-  names(set_of_unions) <- 1:max_k
+  names(set_of_unions) <- paste0("U_", 1:max_k)
   return(set_of_unions)
 }
 
@@ -230,7 +230,7 @@ find_set_of_union_of_sets_of_lengths_from_min_k_to_max_k <- function(min_k, max_
   for(i in min_k:max_k){
     set_of_union_of_sets_of_lengths_for_k_less_than_min_k[[i]] <- find_u_k(i, set_of_union_of_sets_of_lengths_for_k_less_than_min_k[[i-1]])
   }
-  names(set_of_union_of_sets_of_lengths_for_k_less_than_min_k) <- 1:max_k
+  names(set_of_union_of_sets_of_lengths_for_k_less_than_min_k) <- paste0("U_", 1:max_k)
   return(set_of_union_of_sets_of_lengths_for_k_less_than_min_k)
 }
 
