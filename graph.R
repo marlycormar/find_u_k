@@ -96,6 +96,114 @@ add_new_lengths_to_u_k <- function(k){
   return (u_k)
 }
 
+# This method iterates through all possible lengths of u_k
+# that are not in 'known_lengths_from_u_k_minus_1' and checks them
+# against the 'new_lengths_in_u_k' vector.
+# If there is a value missing or that should not be there 
+# It returns a list containing only the value TRUE if the 'new_lengths_in_u_k' is correct.
+# Otherwise, it will return a list(FALSE, l, indexes), which at position 3 
+# will contain a list of l indexes of atoms adding to n if there is a value missing from
+# 'new_lengths_in_u_k'; or just a list(FALSE, l) if there is an extra value in 'new_lengths_in_u_k', 
+test_new_lengths_in_u_k <- function(k, known_lengths_from_u_k_minus_1, new_lengths_in_u_k){
+  
+  # Testing
+  #k <- 3
+  #known_lengths_from_u_k_minus_1 <- c(3)
+  #new_lengths_in_u_k <- c(3, 4)
+  
+  lower_bound_u_k <- ceiling(k*(p_1 - 1)/p_1)
+  upper_bound_u_k <- floor(k*p_1/(p_1 - 1))
+  tentative_u_k <- lower_bound_u_k:upper_bound_u_k
+  
+  for(l in tentative_u_k){
+    
+    # Testing
+    #l <- 2
+    
+    if(!l %in% known_lengths_from_u_k_minus_1 && l != k){
+      indexes <- is_l_in_u_k(k, l)
+      if(length(indexes) == 0 && l %in% new_lengths_in_u_k)
+      {
+        me <- "The following length should NOT be in u_"
+        me <- paste0(me, k)
+        me <- paste0(me, ": ")
+        me <- paste0(me, l)
+        print(me)
+        return(FALSE)
+      }
+      if(length(indexes) > 0 && !(l %in% new_lengths_in_u_k)){
+        me <- "The following length is MISSING from u_"
+        me <- paste0(me, k)
+        me <- paste0(me, ": ")
+        me <- paste0(me, l)
+        print(me)
+        return(FALSE)
+      }
+    }
+  }
+  
+  return(TRUE)
+}
+
+# res[1] <- true/false: true iff n can be decomposed as the sum k atoms
+# res[2] <- true/false: true iff n can be decomposed as the sum l atoms
+# res[3] <- indexes of atoms in the decomposition of n as the sum of l atoms
+is_l_in_set_of_lengths_of_n_rec <- function(n, l, cur_sum, indexes){
+  
+  # Testing
+  #k <- 3
+  #l <- 4
+  #n <- 2
+  #cur_sum <- 0
+  #indexes <- c()
+  
+  if(cur_sum == n){
+    temp_length <- sum(primes[indexes])
+    if(temp_length == l)
+      return(indexes)
+    else
+      return(c())
+  }
+  else {
+    if(cur_sum > n)  return(c())
+    else {
+      max_atom <- max_atom_index_to_consider(n)
+      for(i in 1:max_atom){
+        
+        # Testing
+        #i <- 1
+
+        temp <- is_l_in_set_of_lengths_of_n_rec(n, l, cur_sum + primes[i] - 1, c(indexes, i))
+        if(length(temp) > 0) return(temp)
+      }
+    }
+  }
+  return(c())
+}
+
+# Returns a vector of indexes if there is an integer
+# having a factorization of length l & k.
+# Returns an empty vector otherwise.
+is_l_in_u_k <- function(k, l){
+  
+  # Testing
+  #k <- 3
+  #l <- 4
+  
+  m <- min(k, l)
+  for(n in ceiling(m*(p_1 - 1)/p_1):floor(m)){
+    
+    # Testing 
+    #n <- 2
+    
+    indexes_k <- is_l_in_set_of_lengths_of_n_rec(n, k, 0, c())
+    indexes_l <- is_l_in_set_of_lengths_of_n_rec(n, l, 0, c())
+    if(length(indexes_k) > 0 && length(indexes_l) > 0) return(indexes_l)
+  }
+  
+  return(c())
+}
+
 # Finds u_k given u_{k-1}
 find_u_k <- function(k, u_k_minus_1){
   
