@@ -5,12 +5,11 @@ library(MASS)
 library(rlist)
 
 # Initial setup
-primes <- primes::generate_primes(smallest_prime_to_consider, max_prime) # get the first max_prime primes
-p_1 <- primes[1] # get the first prime
+primes <- primes::generate_primes(smallest_prime_to_consider, max_prime)
+p_1 <- primes[1]
 
 # Traverses the elements l in U_{k-1} to add l+1 to U_k, and 
-# k-1+diff to U_k, where diff=k-l
-# u_k_minus_1 = U_{k-1}
+# k-1+diff to U_k, where diff=k-l.
 add_known_lengths_from_u_k_minus_1 <- function(k, u_k_minus_1) {
   #k <- 2
   u_k <- list()
@@ -64,7 +63,7 @@ add_new_lengths_for_n_rec <- function(n, max_atom_index_to_consider, cur_sum, fa
 }
 
 # Adds the lengths not found with method add_known_lengths_from_u_k_minus_1.
-# By our observations, if $x$ has a factorization of orden $k$ not obtained from $U_{k-1}$,
+# If $x$ has a factorization of orden $k$ not obtained from $U_{k-1}$,
 # then $x$ must be an integer in certain interval. So it sufficies to iterate through such
 # interval finding all the possible lenghts of elements in that interval.
 # This method iterates through all the possible values of $x$.
@@ -72,13 +71,13 @@ add_new_lengths_to_u_k <- function(k){
   #k <- 5
   #n <- 4
   u_k <- list()
-  max_integer <- k - 1 # See observations.
-  min_integer <- ceiling(k*(p_1 - 1)/p_1) # See observations.
+  max_integer <- k - 1
+  min_integer <- ceiling(k*(p_1 - 1)/p_1)
   # Each atom must be multiplied by a multiple of its denominator.
   for(n in min_integer:max_integer){
     max_atom_index_to_consider <- max_atom_index_to_consider(n)
     if(max_atom_index_to_consider == 0 || (n < (primes[1] - 1))){# Do some basic checks
-      print("Either max_atom_index_to_consider = 0 or n < (primes[1] - 1)")
+      print("Either max_atom_index_to_consider is 0 or n < (primes[1] - 1)")
     }
     else{
       res <- unlist(add_new_lengths_for_n_rec(n, max_atom_index_to_consider, 0, 0))
@@ -93,11 +92,7 @@ add_new_lengths_to_u_k <- function(k){
 # This method iterates through all possible lengths of u_k
 # that are not in 'known_lengths_from_u_k_minus_1' and checks them
 # against the 'new_lengths_in_u_k' vector.
-# If there is a value missing or that should not be there 
-# It returns a list containing only the value TRUE if the 'new_lengths_in_u_k' is correct.
-# Otherwise, it will return a list(FALSE, l, indexes), which at position 3 
-# will contain a list of l indexes of atoms adding to n if there is a value missing from
-# 'new_lengths_in_u_k'; or just a list(FALSE, l) if there is an extra value in 'new_lengths_in_u_k', 
+# It returns TRUE if 'new_lengths_in_u_k' vector' is correct for the given k.
 test_new_lengths_in_u_k <- function(k, known_lengths_from_u_k_minus_1, new_lengths_in_u_k){
   
   # Testing
@@ -118,19 +113,11 @@ test_new_lengths_in_u_k <- function(k, known_lengths_from_u_k_minus_1, new_lengt
       indexes <- is_l_in_u_k(k, l)
       if(length(indexes) == 0 && l %in% new_lengths_in_u_k)
       {
-        me <- "The following length should NOT be in u_"
-        me <- paste0(me, k)
-        me <- paste0(me, ": ")
-        me <- paste0(me, l)
-        print(me)
+        print(paste0("The following length should NOT be in u_", k, ": ", l))
         return(FALSE)
       }
       if(length(indexes) > 0 && !(l %in% new_lengths_in_u_k)){
-        me <- "The following length is MISSING from u_"
-        me <- paste0(me, k)
-        me <- paste0(me, ": ")
-        me <- paste0(me, l)
-        print(me)
+        print(paste0("The following length is MISSING from u_", k, ": ", l))
         return(FALSE)
       }
     }
@@ -139,9 +126,9 @@ test_new_lengths_in_u_k <- function(k, known_lengths_from_u_k_minus_1, new_lengt
   return(TRUE)
 }
 
-# res[1] <- true/false: true iff n can be decomposed as the sum k atoms
-# res[2] <- true/false: true iff n can be decomposed as the sum l atoms
-# res[3] <- indexes of atoms in the decomposition of n as the sum of l atoms
+# Returns an empty vector if n doesn't have a factorization of length l.
+# Otherwise, it returns the indexes of the atoms corresponding 
+# to a factorization of n of lenght l. 
 is_l_in_set_of_lengths_of_n_rec <- function(n, l, cur_sum, indexes){
   
   # Testing
@@ -176,8 +163,8 @@ is_l_in_set_of_lengths_of_n_rec <- function(n, l, cur_sum, indexes){
 }
 
 # Returns a vector of indexes if there is an integer
-# having a factorization of length l & k.
-# Returns an empty vector otherwise.
+# having a factorization of length l or 
+# an empty vector otherwise.
 is_l_in_u_k <- function(k, l){
   
   # Testing
