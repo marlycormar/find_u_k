@@ -1,5 +1,5 @@
-install.packages("primes")
-install.packages("rlist")
+install.packages("primes", repos = "http://cran.us.r-project.org")
+install.packages("rlist", repos = "http://cran.us.r-project.org")
 library(primes)
 library(MASS)
 library(rlist)
