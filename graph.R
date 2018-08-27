@@ -56,14 +56,14 @@ max_atom_index_to_consider <- function(n){
 # n: an integer that is assumed to have a factorization of length k
 #    and the one we are finding all possible lengths of factorizations of.
 # max_atom_index_to_consider: the index of the max. possible atom that can be in a factorization of n.
-# sum: current factorization sum.
+# cur_sum: current factorization sum.
 # fact_length: current factorization length.
-add_new_lengths_for_n_rec <- function(n, max_atom_index_to_consider, sum, fact_length){
-  if(n == sum) return (c(fact_length))
-  if(sum > n) return (c(NA))
+add_new_lengths_for_n_rec <- function(n, max_atom_index_to_consider, cur_sum, fact_length){
+  if(n == cur_sum) return (c(fact_length))
+  if(cur_sum > n) return (c(NA))
   result <- list()
   for(i in 1:max_atom_index_to_consider){
-    temp <- add_new_lengths_for_n_rec(n, max_atom_index_to_consider, sum + primes[i] - 1, fact_length + primes[i])
+    temp <- add_new_lengths_for_n_rec(n, max_atom_index_to_consider, cur_sum + primes[i] - 1, fact_length + primes[i])
     result[[length(result) + 1]] <- temp
   }
   return (result)
@@ -73,6 +73,7 @@ add_new_lengths_for_n_rec <- function(n, max_atom_index_to_consider, sum, fact_l
 # By our observations, if $x$ has a factorization of orden $k$ not obtained from $U_{k-1}$,
 # then $x$ must be an integer in certain interval. So it sufficies to iterate through such
 # interval finding all the possible lenghts of elements in that interval.
+# This method iterates through all the possible values of $x$.
 add_new_lengths_to_u_k <- function(k){
   #k <- 5
   #n <- 4
@@ -97,7 +98,24 @@ add_new_lengths_to_u_k <- function(k){
 
 # Finds u_k given u_{k-1}
 find_u_k <- function(k, u_k_minus_1){
-  u_k <- unique(unlist(c(add_known_lengths_from_u_k_minus_1(k, u_k_minus_1), add_new_lengths_to_u_k(k))))
+  
+  # Testing
+  #k <- 5
+  #u_k_minus_1 <- c(3, 4, 5)
+    
+    
+  known_lengths_from_u_k_minus_1 <- add_known_lengths_from_u_k_minus_1(k, u_k_minus_1)
+  new_lengths_in_u_k <- add_new_lengths_to_u_k(k)
+  
+  #test <- test_new_lengths_in_u_k(k, known_lengths_from_u_k_minus_1, new_lengths_in_u_k)
+  #if(!test)
+  #{
+  #  print("The values of u_k are not correct.")
+  #  return(NA)
+  #}
+  
+  u_k <- unique(unlist(c(known_lengths_from_u_k_minus_1, new_lengths_in_u_k)))
+
   return (sort(u_k))
 }
 
@@ -149,7 +167,6 @@ draw_plot <- function(set_of_union_of_sets_of_lengths){
   #plot(xValues, yValues, cex=dotsize, xlim=c(0,width+1), ylim=c(0, height+1), 
   #     bty="n", pch=1,  col=cm.colors(2), xlab="k", ylab="Uk", axes = FALSE)
   axis(side = 1, at = 1:width)
-  #box()
   axis(side = 2, at = 1:height)
 }
 
