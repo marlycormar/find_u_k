@@ -230,10 +230,19 @@ find_set_of_union_of_sets_of_lengths_from_min_k_to_max_k <- function(min_k, max_
   #max_k = 3
   for(i in min_k:max_k){
     set_of_union_of_sets_of_lengths_for_k_less_than_min_k[[i]] <- find_u_k(i, set_of_union_of_sets_of_lengths_for_k_less_than_min_k[[i-1]])
+    print(paste("Done with k = ", sep = "", i))
   }
   names(set_of_union_of_sets_of_lengths_for_k_less_than_min_k) <- paste0("U_", 1:max_k)
   return(set_of_union_of_sets_of_lengths_for_k_less_than_min_k)
 }
+
+# Testing
+#up_to_u_23 <- find_set_of_union_of_sets_of_lengths(23)
+#saveRDS(up_to_u_23, "up_to_u_23")
+#from_u_24_to_u_30 <- 
+#  find_set_of_union_of_sets_of_lengths_from_min_k_to_max_k(24,
+#                                                           30,
+#                                                           up_to_u_23)
 
 draw_plot <- function(set_of_union_of_sets_of_lengths){
   height <- 2*length(set_of_union_of_sets_of_lengths)
@@ -259,3 +268,4 @@ draw_plot <- function(set_of_union_of_sets_of_lengths){
   axis(side = 1, at = 1:width)
   axis(side = 2, at = 1:height)
 }
+
