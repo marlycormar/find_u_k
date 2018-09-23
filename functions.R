@@ -220,6 +220,7 @@ find_set_of_union_of_sets_of_lengths <- function(max_k){
   set_of_unions[1] <- list(1)
   for(i in 2:max_k){
     set_of_unions[[i]] <- find_u_k(i, set_of_unions[[i-1]])
+    print(paste("Done with k = ", sep = "", i))
   }
   names(set_of_unions) <- paste0("U_", 1:max_k)
   return(set_of_unions)
